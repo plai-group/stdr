@@ -1,6 +1,6 @@
 # Coping with simulators that don't always return.
 
-Source code for the paper Warrington, A., Naderiparizi, S., & Wood, F. (2019). Coping with simulators that don't always return. In _The 23nd International Conference on Artificial Intelligence and Statistics_ (_to appear_).
+Source code for the paper Warrington, A., Naderiparizi, S., & Wood, F. (2020). Coping with simulators that don't always return. In _The 23nd International Conference on Artificial Intelligence and Statistics_ (_to appear_).
 
 **Code to follow soon.**
 
