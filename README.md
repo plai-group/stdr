@@ -13,8 +13,8 @@ Deterministic models are approximations of reality that are easy to interpret an
 ## General Gist
 Without going into too much detail here (see XXX for more detailed infomation), the purpose of our work here is to mitigate against the case when a simulator might fail, an eventually we denote using ⊥ (\bot in LaTeX, read 'bot' or 'bottom'). We consider specifically the case where an otherwise deterministic time series simulator (or state-space model) is converted to be a stochastic model by simply perturbing the state at each time point such that one can use it in a probabilistic inference tool such as sequential Monte Carlo (SMC).
 
-<object data="docs/figures/rs_p.jpg" type="application/pdf" width="400px" height="400px">
-    <embed src="docs/figures/rs_p.jpg">
+<object data="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.pdf" type="application/pdf" width="400px" height="400px">
+    <embed src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.pdf">
     </embed>
 </object>
 
@@ -22,8 +22,8 @@ The above figure is a simple description of the process. The deterministic simul
 
 The rejected samples represent wasted computational resources, especially in domains or operating regimes where the rejection rate is high. We may also be operating with a simulator that is expensive and hence we do not want to waste computation, and may only be able to afford a _single_ sample of `z_t`. If the sample fails, then that particle (in the SMC/particle filter sweep) is simply removed. This reduces the effective sample size and increases the variance of any summary statistic computed from the resulting distributions.
 
-<object data="docs/figures/rs_q.jpg" type="application/pdf" width="400px" height="400px">
-    <embed src="docs/figures/rs_q.jpg">
+<object data="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.pdf" type="application/pdf" width="400px" height="400px">
+    <embed src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.pdf">
     </embed>
 </object>
 
