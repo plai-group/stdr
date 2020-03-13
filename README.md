@@ -13,7 +13,7 @@ Deterministic models are approximations of reality that are easy to interpret an
 ## General Gist
 Without going into too much detail here (see XXX for more detailed infomation), the purpose of our work here is to mitigate against the case when a simulator might fail, an eventually we denote using ⊥ (\bot in LaTeX, read 'bot' or 'bottom'). We consider specifically the case where an otherwise deterministic time series simulator (or state-space model) is converted to be a stochastic model by simply perturbing the state at each time point such that one can use it in a probabilistic inference tool such as sequential Monte Carlo (SMC).
 
-![figure 1](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.jpg){:height="50%" width="50%"}
+<img src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.jpg" width="300">
 
 The above figure is a simple description of the process. The deterministic simulator is denoted as `f` and is applied as a deterministic function to the state `x_{t-1}`. However, it is additively perturbed by an amount, denoted `z_t`, drawn from some user-specified distribution `p(z_t | x_{t-1})`. While we provision this being conditioned on current state, it often is not, and is chosen to be Gaussian distributed noise with heuristically determined variance. The perturbed state is then passed through `f`. If the simulator fails, the loop is repeated with a new `z_t` drawn. If the simulator does not fail, the process exits. In this manner, this resembles a rejection sampler with hard rejections. 
 
