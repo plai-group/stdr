@@ -65,11 +65,11 @@ def experiment():
     else:
         cluster = False
 
-    TRAINSURROGATE = False
+    TRAINSURROGATE = True
     DOSMC = True
-    USE_PREMADE_VAL_DATASET = None  # './WormSimNFValData.p'  # {None, $path}
-    USE_PREMADE_TRAIN_DATASET = None  # './WormSimNFTrainData.p'  # {None, $path}
-    USE_PRETRAINED_NETWORK = './Results/RNF_local_2020_02_21_16_06_37/RNF_best_model.pt'  # './Results/Success/RNF_cluster_2019_09_26_12_27_27/RNF_best_model.pt'  # {None, $path}
+    USE_PREMADE_VAL_DATASET = None  # {None, $path}
+    USE_PREMADE_TRAIN_DATASET = None  # {None, $path}
+    USE_PRETRAINED_NETWORK = None  # {None, $path}
 
     # Define any global settings that are frequently different based on whether we are training on a local
     # machine or on a larger cluster.
