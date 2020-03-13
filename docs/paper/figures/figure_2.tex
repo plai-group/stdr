@@ -1,0 +1,12 @@
+\begin{figure}
+    \centering
+    % \includegraphics[width=\columnwidth]{figures/p_arch.pdf}
+    \includegraphics[width=\columnwidth]{figures/cnf_arch.pdf}
+    \caption{Diagram visualizing how $q_{\phi}$ is structured and used. 
+    The previous state is input to the hypernetwork, a series of $L$ single layer neural networks, denoted $h_l$.
+    Each network outputs parameters, denoted $\phi^l$, for each of the $L$ layers in the flow conditioned on the state.
+    The flow samples a perturbation as $\mathbf{z}_t \sim q_{\phi}\left(\mathbf{z}_t | \mathbf{x}_{t-1} \right)$, with the internal states of the flow denoted by $\epsilon_l$.
+    This perturbation is summed with the previous state and passed through the simulator, $f$, outputting the iterated state, $\mathbf{x}_t$.
+    }
+    \label{fig:meth:cnf_arch}
+\end{figure}
