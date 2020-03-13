@@ -19,7 +19,7 @@ The above figure is a simple description of the process. The deterministic simul
 
 The rejected samples represent wasted computational resources, especially in domains or operating regimes where the rejection rate is high. We may also be operating with a simulator that is expensive and hence we do not want to waste computation, and may only be able to afford a _single_ sample of `z_t`. If the sample fails, then that particle (in the SMC/particle filter sweep) is simply removed. This reduces the effective sample size and increases the variance of any summary statistic computed from the resulting distributions.
 
-![figure 2](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.jpg){:height="50%" width="50%"}
+<img src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.jpg" width="300">
 
 Therefore, we modify the original algorithm by replacing `p(z_t | x_{t-1})` with a learned object `q_{\phi}(z_t | x_{t-1})`, where this distribution is trained such that no rejections are incurred. To do this, we use evidence maximization of the learned density on perturbation-state pairs that we know to be successfully integrable. As such, we eliminate the rejection sampling loop, resulting in much higher effective sample sizes and lower wasted computation. (Obviously, `q` will not be perfect, and so this rejection sampling loop is still provisioned for, but for illustrations sake this is what we are striving towards.)
 
