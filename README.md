@@ -13,14 +13,14 @@ Deterministic models are approximations of reality that are easy to interpret an
 ## General Gist
 Without going into too much detail here (see XXX for more detailed infomation), the purpose of our work here is to mitigate against the case when a simulator might fail, an eventually we denote using ⊥ (\bot in LaTeX, read 'bot' or 'bottom'). We consider specifically the case where an otherwise deterministic time series simulator (or state-space model) is converted to be a stochastic model by simply perturbing the state at each time point such that one can use it in a probabilistic inference tool such as sequential Monte Carlo (SMC).
 
-![](/docs/figures/rs_p.pdf)
+![](docs/figures/rs_p.pdf)
 
 
 The above figure is a simple description of the process. The deterministic simulator is denoted as `f` and is applied as a deterministic function to the state `x_{t-1}`. However, it is additively perturbed by an amount, denoted `z_t`, drawn from some user-specified distribution `p(z_t | x_{t-1})`. While we provision this being conditioned on current state, it often is not, and is chosen to be Gaussian distributed noise with heuristically determined variance. The perturbed state is then passed through `f`. If the simulator fails, the loop is repeated with a new `z_t` drawn. If the simulator does not fail, the process exits. In this manner, this resembles a rejection sampler with hard rejections. 
 
 The rejected samples represent wasted computational resources, especially in domains or operating regimes where the rejection rate is high. We may also be operating with a simulator that is expensive and hence we do not want to waste computation, and may only be able to afford a _single_ sample of `z_t`. If the sample fails, then that particle (in the SMC/particle filter sweep) is simply removed. This reduces the effective sample size and increases the variance of any summary statistic computed from the resulting distributions.
 
-![](/docs/figures/rs_q.pdf)
+![](docs/figures/rs_q.pdf)
 
 Therefore, we modify the original algorithm by replacing `p(z_t | x_{t-1})` with a learned object `q_{\phi}(z_t | x_{t-1})`, where this distribution is trained such that no rejections are incurred. To do this, we use evidence maximization of the learned density on perturbation-state pairs that we know to be successfully integrable. As such, we eliminate the rejection sampling loop, resulting in much higher effective sample sizes and lower wasted computation. (Obviously, `q` will not be perfect, and so this rejection sampling loop is still provisioned for, but for illustrations sake this is what we are striving towards.)
 
