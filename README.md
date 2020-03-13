@@ -13,10 +13,11 @@ Deterministic models are approximations of reality that are easy to interpret an
 ## General Gist
 Without going into too much detail here (see XXX for more detailed infomation), the purpose of our work here is to mitigate against the case when a simulator might fail, an eventually we denote using ⊥ (\bot in LaTeX, read 'bot' or 'bottom'). We consider specifically the case where an otherwise deterministic time series simulator (or state-space model) is converted to be a stochastic model by simply perturbing the state at each time point such that one can use it in a probabilistic inference tool such as sequential Monte Carlo (SMC).
 
-![figure 2](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.pdf)
+![figure 1](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.jpg)
+![figure 1](docs/figures/rs_p.jpg)
 
-<object data="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.pdf">
+<object data="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.jpg" type="application/pdf" width="700px" height="700px">
+    <embed src="https://github.com/plai-group/stdr/blob/master/docs/figures/rs_p.jpg">
         <p>This browser does not support PDFs. Please download the PDF to view it: <a href="http://yoursite.com/the.pdf">Download PDF</a>.</p>
     </embed>
 </object>
@@ -25,7 +26,7 @@ The above figure is a simple description of the process. The deterministic simul
 
 The rejected samples represent wasted computational resources, especially in domains or operating regimes where the rejection rate is high. We may also be operating with a simulator that is expensive and hence we do not want to waste computation, and may only be able to afford a _single_ sample of `z_t`. If the sample fails, then that particle (in the SMC/particle filter sweep) is simply removed. This reduces the effective sample size and increases the variance of any summary statistic computed from the resulting distributions.
 
-![figure 2](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.pdf)
+![figure 2](https://github.com/plai-group/stdr/blob/master/docs/figures/rs_q.jpg)
 
 Therefore, we modify the original algorithm by replacing `p(z_t | x_{t-1})` with a learned object `q_{\phi}(z_t | x_{t-1})`, where this distribution is trained such that no rejections are incurred. To do this, we use evidence maximization of the learned density on perturbation-state pairs that we know to be successfully integrable. As such, we eliminate the rejection sampling loop, resulting in much higher effective sample sizes and lower wasted computation. (Obviously, `q` will not be perfect, and so this rejection sampling loop is still provisioned for, but for illustrations sake this is what we are striving towards.)
 
