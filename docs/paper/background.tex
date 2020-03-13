@@ -1,0 +1,60 @@
+\subsection{Smoothing Deterministic Models}
+Deterministic simulators are often stochastically perturbed to increase the diversity of the achievable simulations and to fit data more effectively.
+The most widespread example of this is perturbing linear dynamical systems with Gaussian noise at each timestep.
+The design of the system is such that the distribution over state at each point in time is Gaussian distributed.
+However, the simplistic dynamics of such a system may be insufficient for simulating more complex systems.
+Examples of such systems are: stochastic models of neural dynamics~\citep{fox1997stochastic, coutin2018fractional, goldwyn2011hh, Saarinen2008hh}, econometrics~\citep{lopes2011finance}, epidemiology~\citep{allen2017primer} and mobile robotics~\citep{thrun2001robust, fallon2012efficient}.
+In these examples, the simulator state is perturbed with noise drawn from a distribution and is iterated using the simulator to create discrete approximations of the distribution over state as a function of time.
+
+\subsection{Simulator Failure}
+As simulators become more complex, guaranteeing the simulator will not fail for perturbed inputs becomes more difficult, and individual function evaluations become more expensive.
+\citet{lucas2013failure} and \citet{edwards2011precalibrating} establish the sensitivity of earth science models to global parameter values by building a discriminative classifier for parameters that induce failure. 
+\citet{gmd2019crash} take an alternative approach instead treating simulator failure as an imputation problem, fitting a function regressor to predict the outcome of the failed experiment given the neighboring experiments that successfully terminated.
+However these methods are limited by the lack of clear probabilistic interpretation in terms of the originally specified joint distribution in time series models, their ability to scale to high dimensions, and their applicability to state-space models.
+
+\subsection{State-space Inference and Model Selection}
+Probabilistic models are ultimately deployed to make inferences about the world.
+Hence the goal is to be able to recover distributions over unobserved states, predict future states and learn unknown parameters of the model from data.
+Posterior state-space inference refers to the task of recovering the distribution $p_{\mathcal{M}}(\mathbf{x}_{0:T} | \mathbf{y}_{1:T})$, where $\mathbf{x}_{0:T}$ are the latent states, $\mathbf{y}_{1:T}$ are the observed data, and $\mathcal{M}$ denotes the model if multiple different models are available.
+Inference in Gaussian perturbed linear dynamical systems can be performed using techniques such as Kalman smoothing~\citep{kalman1960new}, however, the restrictions on such techniques limit their applicability to complex simulators, and so numerical methods are often used in practice. 
+
+\begin{algorithm}[t]
+ \caption{Sequential Monte Carlo}\label{alg:meth:smc_p}
+ \begin{algorithmic}[1]
+  \Procedure{SMC}{$p_{\mathcal{M}}(\mathbf{x}_0)$, $\overline{p}_{\mathcal{M}}(\mathbf{x}_t | \mathbf{x}_{t-1})$, $\mathbf{y}_{1:T}$, $p_{\mathcal{M}}(\mathbf{y}_t | \mathbf{x}_t)$, $N$} 
+    \For{$n=1:N$}
+        \State $\mathbf{x}_0^{(n)} \sim p_{\mathcal{M}}(\mathbf{x}_0)$ \Comment{Initialize from prior.}
+    \EndFor
+    \State $L_{\mathcal{M}} \gets 0$ \Comment{Track log-evidence} 
+     \For{$t=1:T$}
+        \For{$n=1:N$}
+          \State $\tilde{\mathbf{x}}_t^{(n)} \sim \overline{p}_{\mathcal{M}}\left(\mathbf{x}_t | \mathbf{x}_{t-1}^{(n)}\right)$  \label{alg:meth:smc_p:p} \Comment{Alg \ref{alg:rs}.}
+          \State $w^{(n)}_t \gets p_{\mathcal{M}}\left(\mathbf{y}_t | \tilde{\mathbf{x}}_t^{(n)}\right)$ \Comment{Score particle.} \label{alg:meth:smc_p:w}
+        \EndFor
+        \For{$n=1:N$} \Comment{Normalize weights.}
+          \State $W^{(n)}_t \gets w^{(n)}_t / \sum_{i=1}^N w^{(i)}_t$ 
+        \EndFor
+        \For{$n=1:N$} \Comment{Apply resampling.}
+          \State $a^{(n)}_t \sim \text{Discrete}\left(\mathbf{W}_t\right)$ \label{alg:meth:smc_p:a}
+          \State $\mathbf{x}_{t}^{(n)} \gets \tilde{\mathbf{x}}_{t}^{\left(a^{(n)}_t\right)}$ 
+        \EndFor
+        \State $L_{\mathcal{M}} \gets L_{\mathcal{M}} + \log\left(\frac{1}{N}\sum_{i=1}^N w^{(i)}_t\right)$ \label{alg:meth:smc_p:e}
+     \EndFor
+     \State $\textbf{return}\ \mathbf{x}^{(1:N)}_{0:T},\ a_{1:T}^{(1:N)},\ L_{\mathcal{M}}$ 
+  \EndProcedure
+ \end{algorithmic}
+\end{algorithm}
+
+A common method for performing inference in complex, simulation based models is sequential Monte Carlo (SMC)~\citep{doucet2001introduction}.
+The basic algorithm for SMC is shown in Algorithm \ref{alg:meth:smc_p}, where $p_{\mathcal{M}}(\mathbf{x}_0)$ is the prior over initial state, $\overline{p}_{\mathcal{M}}(\mathbf{x}_t | \mathbf{x}_{t-1})$ is the dynamics model, or simulator, $p_{\mathcal{M}}(\mathbf{y}_t | \mathbf{x}_t)$ is the likelihood, defining the relationship between latent states and observed data, and $N$ is the number of particles used.
+On a high level, SMC produces a discrete approximation of the target distribution by iterating particles through the simulator, and then preferentially continuing those simulations that ``explain'' the observed data well.
+While a detailed understanding of particle filtering is not required, the core observation required for this work is that the likelihood of failed simulations is defined as zero: $p(\mathbf{y}_t | \mathbf{x}_t = \bot) \coloneqq 0$, and hence are rejected with certainty.
+
+Posterior inference pipelines often also provide estimates of the model evidence, $p_{\mathcal{M}}(\mathbf{y}_{1:T})$.
+SMC provides such an estimate, referred to as a pseudo-marginal evidence, denoted in Algorithm~\ref{alg:meth:smc_p} as $L_{\mathcal{M}}$.
+This pseudo-marginal evidence is calculated (in log space) as the sum of the expected value of the unnormalized importance weights (Algorithm \ref{alg:meth:smc_p}, Lines \ref{alg:meth:smc_p:w} and \ref{alg:meth:smc_p:e}).
+This evidence can be combined with the prior probability of each model via Bayes rule to estimate the posterior probability of the model (up to a normalizing constant)~\citep{mackay2003information}.
+These posteriors can be compared to perform Bayesian model selection, where the model with the highest posterior is selected and used to perform inference.
+This is often referred to as marginal maximum \emph{a posteriori} parameter estimation (or model selection)~\citep{doucet2002marginal, kantas2015particle}.
+Recent work investigates model selection using approximate, likelihood-free inference techniques~\citep{papamakarios2019sequential, lueckmann2019likelihood}, however, we do not consider these methods here, instead focusing on mitigating computational inefficiencies arising directly from simulator failure.
+

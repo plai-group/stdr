@@ -1,0 +1,85 @@
+\documentclass[twoside]{article}
+
+\usepackage[accepted]{aistats2020}
+
+% If you set papersize explicitly, activate the following three lines:
+\special{papersize = 8.5in, 11in}
+\setlength{\pdfpageheight}{11in}
+\setlength{\pdfpagewidth}{8.5in}
+
+% If you use natbib package, activate the following three lines:
+\usepackage[square]{natbib}
+\renewcommand{\bibname}{References}
+\renewcommand{\bibsection}{\subsubsection*{\bibname}}
+\usepackage{amsmath, amsthm, amsfonts}
+
+\usepackage{subcaption}
+\usepackage{pdfpages}
+\usepackage{makecell}
+\usepackage{todonotes}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{relsize}
+\usepackage{algorithm} 
+\usepackage{algpseudocode}
+\usepackage{mathtools}
+\usepackage[percent]{overpic}
+
+\usepackage{color}
+\newcommand{\aw}[1]{\textcolor{magenta}{[AW: #1]}}
+\newcommand{\fw}[1]{\textcolor{green}{[FW: #1]}}
+\newcommand{\sn}[1]{\textcolor{cyan}{[SN: #1]}}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator*{\argmin}{arg\,min} % Jan Hlavacek
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+
+\algtext*{EndWhile}% Remove "end while" text
+\algtext*{EndIf}% Remove "end if" text
+\algtext*{EndFor}% Remove "end if" text
+
+\begin{document}
+
+\twocolumn[
+\aistatstitle{Coping With Simulators That Don't Always Return}
+
+\aistatsauthor{ Andrew Warrington \And Saeid Naderiparizi \And  Frank Wood }
+
+\aistatsaddress{University of Oxford \\ \url{andreww@robots.ox.ac.uk} \And  University of British Columbia \\ \url{saeidnp@cs.ubc.ca} \And University of British Columbia \\ \url{fwood@cs.ubc.ca}}
+]
+
+\begin{abstract}
+Deterministic models are approximations of reality that are easy to interpret and often easier to build than stochastic alternatives.  
+Unfortunately, as nature is capricious, observational data can never be fully explained by deterministic models in practice.  
+Observation and process noise need to be added to adapt deterministic models to behave stochastically, such that they are capable of explaining and extrapolating from noisy data.
+We investigate and address computational inefficiencies that arise from adding process noise to deterministic simulators that fail to return for certain inputs; a property we describe as ``brittle.''
+We show how to train a conditional normalizing flow to propose perturbations such that the simulator succeeds with high probability, increasing computational efficiency.
+\end{abstract}
+
+\section{Introduction}
+\input{introduction.tex}
+
+\section{Background}
+\input{background.tex}
+
+\section{Methodology}
+\input{methodology.tex}
+
+\section{Experiments}
+\input{experiments.tex}
+
+\section{Conclusion}
+\input{conclusion.tex}
+
+\newpage
+
+\section{Acknowledgements}
+\input{acknowledgements.tex}
+
+\bibliographystyle{abbrvnat}
+\bibliography{ce_exe}
+
+\end{document}

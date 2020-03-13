@@ -1,0 +1,83 @@
+\label{sec:experiments}
+
+\subsection{Toy Problem -- Annulus}
+\label{sec:annulus}
+We first demonstrate our approach on a toy problem.
+The true generative model of the observed data is a constant speed circular orbit around the origin in the $x$-$y$ plane, such that $\mathbf{x}_t = \left\lbrace x_t, y_t, \dot{x}_t, \dot{y}_t \right\rbrace \in  \mathbb{R}^4$.
+To analyze this data we use a misspecified model that only simulates linear forward motion.
+To overcome the model mismatch and fit the observed data, we add Gaussian noise to position and velocity.
+We impose a failure constraint limiting the change in the distance of the point from the origin to a fixed threshold.
+This condition mirrors our observation that states in brittle simulators have large allowable perturbations in particular directions, but very narrow permissible perturbations in other directions.
+The true radius is unknown and so we must amortize over possible radii.
+
+\input{figures/figure_3}
+
+The results of this experiment are shown in Figure~\ref{fig:ring}.
+The interior of the black dashed lines in Figure~\ref{fig:ring:space} indicates the permissible $\dot{x}$-$\dot{y}$ perturbation, for the given position and zero velocity, where we have centered each distribution on the current position for ease of visual inspection.
+Red contours indicate the original density $p(\mathbf{z}_t | \mathbf{x}_{t-1})$, and blue contours indicate the learned density $q_{\phi}(\mathbf{z}_t | \mathbf{x}_{t-1})$.
+The fraction of the probability mass outside the black dashed region is the expected rejection rate.
+Figure~\ref{fig:ring:ar} shows the rejection rate drops from approximately $75\%$ under the original model to approximately $4\%$ using a trained $q_{\phi}$.
+
+\input{figures/figure_4}
+
+We then use the learned $q_{\phi}$ as the perturbation proposal in an SMC sweep, where we condition on noisy observations of the $x$-$y$ coordinates.
+As we focus on the sample efficiency of the sweep, we fix the number of calls to the simulator in Algorithm \ref{alg:rs} to a single call, instead of proposing and rejecting until acceptance.
+Failed particles are then not resampled (with certainty) during the resampling.
+This means that each iteration of the SMC makes a fixed number of calls to the simulator, and hence we can compare algorithms under a fixed sample budget.
+Figure \ref{fig:ring:smc:var} shows that we recover lower variance evidence approximations for a fixed sample budget by using $q_{\phi}$ instead of $p$.
+A paired t-test evaluating the difference in variance returns a p-value of less than $0.0001$, indicating a strong statistical difference between the performance under $p$ and $q_{\phi}$, confirming that using $q_{\phi}$ increases the fidelity of inference for a fixed sample budget.
+
+\subsection{Bouncing Balls}
+\label{sec:experiments:bb}
+Our second example uses a simulator of balls bouncing elastically, as shown in Figure \ref{fig:balls:trajectory}.
+We model the position and velocity of each ball, such that the dimensionality of the state vector, $\mathbf{x}_t$, is four times the number of balls.
+We add a small amount of Gaussian noise at each iteration to the position and velocity of each ball.
+This perturbation induces the possibility that two balls overlap, or, a ball intersects with the wall, representing an invalid physical configuration and results in simulator failure.
+We note that here, we are conditioning on the state of \emph{all} balls simultaneously, and proposing the perturbation to the state \emph{jointly}.
+
+Figure \ref{fig:balls:space} shows the distribution over position perturbation of a single ball, conditioned on the other ball being stationary.
+Blue contours show the estimated distribution over accepted perturbations learned by autoregressive flow.
+Figure \ref{fig:balls:rr} shows the rejection rate under $p$ and $q_{\phi}$ as a function of the position of the first ball, with the second ball fixed in the position shown, showing that rejection has been all but eliminated.
+We again see a reduction in the variance of the evidence approximation computed by a particle filter when using $q_{\phi}$ instead of $p$ (figure in the supplementary materials).
+
+\subsection{MuJoCo}
+\label{sec:experiments:tosser}
+We now apply our method to the popular robotics simulator MuJoCo~\citep{todorov2012mujoco}, specifically using the built-in example ``tosser,'' where a capsule is ``tossed'' by an actuator into a bucket, shown in Figure \ref{fig:tosser:im}.
+Tosser displays ``choatic'' aspects, as minor changes in the position of the object results in large changes in the trajectories achieved by the simulator.
+
+MuJoCo allows some overlap between the objects to simulate contact dynamics. 
+This is an example of model misspecification borne out of the requirements of reasonably writing a simulator.
+We therefore place a hard limit on the amount objects are allowed to overlap.
+This is an example of a user-specified constraint that requires the simulator to be run to evaluate.
+We add Gaussian distributed noise to the position and velocity of the capsule.
+
+\input{figures/figure_5.tex}
+
+Figure \ref{fig:tosser} shows the results of this experiment.
+The capsule is mostly in free space resulting in an average rejection rate under $p$ of $10\%$.
+Figure \ref{fig:tosser:ar} shows that the autoregressive flow learns a proposal with a lower rejection rate, reaching $3\%$ rejection.
+However these rejections are concentrated in the critical regions of state-space, where chaotic behavior occurs, and so this reduction yields an large reduction in the variance of the evidence approximation, as shown in Figure \ref{fig:tosser:smc:var}.
+
+\input{figures/figure_6.tex}
+
+We conclude this example by evaluating our method on hypothesis testing using pseudo-marginal evidence estimates.
+The results for this are shown in Figure \ref{fig:tosser_hyp}.
+We test $5$ different hypothesis of the mass of the capsule.
+Using $p$ results in higher variance evidence approximations than when $q_{\phi}$ is used. 
+Additionally, under $p$ the wrong model is selected ($2$ instead of $3$), although with low significance ($p=0.125$), while using $q_{\phi}$ selects the correct hypothesis with $p=0.0127$.
+For this experiment we note that $q_{\phi}$ was trained on a single value of mass, and that this ``training mass'' was different to the ``testing mass.''
+We believe this contributes to the increased variance in hypothesis $1$, which is very light compared to the training mass.
+Training a $q_{\phi}$ with a further level of amortization over different mass values would further increase the fidelity of the model selection.
+This is intimately linked with the larger project of jointly learning the model, and so we defer investigation to future works.
+
+\subsection{Neuroscience Simulator}
+\label{sec:sub:wormsim}
+We conclude by applying our algorithm to a simulator for the widely studied \emph{Caenorhabditis elegans} roundworm.
+WormSim, presented by \citet{boyle2012gait}, is a simulator of the locomotion of the worm, using a $510$ dimensional state representation.
+We apply perturbations to a $98$ dimensional subspace defining the physical position of the worm, while conditioning on the full $510$ dimensional state vector.
+The expected rate of failure increases sharply as a function of the scale of the perturbation applied, as shown in Figure \ref{fig:wormsim:bot_rate}, as the integrator used in WormSim is unable to integrate highly perturbed states.
+
+The rejection rate during training is shown in Figure \ref{fig:wormsim:bot_nf_rate}.
+We are able to learn an autoregressive flow with lower rejection rates, reaching approximately $53\%$ rejection, when $p$ has approximately $75\%$ rejection.
+Although the rejection rate is higher than ultimately desired, we include this example as a demonstration of how rejections occur in simulators through integrator failure.
+We believe larger flows with regularized parameters can reduce the rejection rate further.

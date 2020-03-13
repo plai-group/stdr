@@ -1,0 +1,7 @@
+In this paper we have tackled reducing simulator failures caused by naively perturbing the input state.
+We achieve this by showing that stochastically perturbed simulators define a rejection sampler with a well defined target distribution and learning a conditional autoregressive flow to estimate the state-dependent proposal distribution conditioned on acceptance.
+We then show that using this learned proposal reduces the variance of inference results, with applications for Bayesian model selection.
+We believe this work has readily transferable practical contributions to not just the machine learning community, but the wider scientific community where such naively modified simulation platforms are widely deployed.
+As part of the experiments we present, we identify an extension: introducing an additional level of amortization over static simulation parameters.
+This extension builds towards our larger research vision of building toolchains for efficient inference and learning in brittle simulators.
+Further development will facilitate efficient gradient-based model learning in these brittle simulators.
